@@ -1,0 +1,3 @@
+Change the db format to db[guild id] = [channel id, webhook id, count, last counter, [ignored roles], [ignored members], {member id: times counted}]
+
+Also, fix the numbering for the $top command
