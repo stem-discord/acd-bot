@@ -1,4 +1,3 @@
-#developed by gnaw#8208 and #9095
 import discord
 from discord.ext import commands
 from replit import db
@@ -61,8 +60,7 @@ class Something: #idk what to call this
 
     def __getitem__(self, key):
         if str(key) not in self._cache:
-            self._cache[str(key)] = DbElementWithLock(
-                DbElement.from_db_element(self.db[str(key)]))
+            self._cache[str(key)] = DbElementWithLock(DbElement.from_db_element(self.db[str(key)]))
         return copy.deepcopy(self._cache[str(key)].dbElement)
 
     def __setitem__(self, key, val):
@@ -81,8 +79,7 @@ class Something: #idk what to call this
         if dbElement is None:
             return None
         if str(key) not in self._cache:
-            self._cache[str(key)] = DbElementWithLock(
-                DbElement.from_db_element(dbElement))
+            self._cache[str(key)] = DbElementWithLock(DbElement.from_db_element(dbElement))
         return copy.deepcopy(self._cache[str(key)].dbElement)
 
     def get_lock(self, key):
@@ -90,8 +87,7 @@ class Something: #idk what to call this
         if dbElement is None:
             return None
         if str(key) not in self._cache:
-            self._cache[str(key)] = DbElementWithLock(
-                DbElement.from_db_element(dbElement))
+            self._cache[str(key)] = DbElementWithLock(DbElement.from_db_element(dbElement))
         return self._cache[str(key)].lock
 
     def keys(self):
@@ -159,13 +155,12 @@ def top_embed(dbElement, member, page):
     embed = discord.Embed(
         title="top counters",
         description=
-        f"`{list(dbElement.ranking_dict.values()).index(dbElement.ranking_dict[str(member.id)])+1 if str(member.id) in dbElement.ranking_dict else -1}`. {member.mention}: `{dbElement.ranking_dict[str(member.id)] if str(member.id) in dbElement.ranking_dict else 0}`\n\n{temp}"
-    )
+        f"`{list(dbElement.ranking_dict.values()).index(dbElement.ranking_dict[str(member.id)])+1 if str(member.id) in dbElement.ranking_dict else -1}`. {member.mention}: `{dbElement.ranking_dict[str(member.id)] if str(member.id) in dbElement.ranking_dict else 0}`\n\n{temp}")
     embed.set_footer(text=f"page {page}/{len(dbElement.ranking_dict) // 10 + 1}")
     return embed
 
 
-def ocr_space_url(message):
+def ocr(message):
     formats=['png', 'jpg', 'jpeg']
     temp = []
     for attachment in message.attachments:
@@ -273,13 +268,17 @@ async def acd(message):
     if message.author.bot:
         return
 
+    ignore = ["practice", "review"]
+
+    flags = ["quiz", "test", "exam", "assessment"]
+
     temp = message.content.lower().split()
     if "help" in temp:
-        for word in ["practice", "review"]:
+        for word in ignore:
             if word in temp:
                 return
 
-        for word in ["quiz", "test", "exam", "assessment"]:
+        for word in flags:
             if word in temp:
                 await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed\n*this action was perfomed automatically*")
                 await log_acd(message)
@@ -288,13 +287,13 @@ async def acd(message):
     if not len(message.attachments):
         return
     
-    temp = ocr_space_url(message)
+    temp = ocr(message)
 
-    for word in ["practice", "review"]:
+    for word in ignore:
         if word in temp:
             return
 
-    for word in ["quiz", "test", "exam", "assessment"]:
+    for word in flags:
         if word in temp:
             await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed\n*this action was perfomed automatically*")
             await log_acd(message)
@@ -516,7 +515,7 @@ async def count_info(ctx):
 
 @bot.command()
 async def image_to_text(ctx):
-    await send(ctx.channel, ' '.join(ocr_space_url(ctx.message)))
+    await send(ctx.channel, ' '.join(ocr(ctx.message)))
 
 
 @bot.command()
