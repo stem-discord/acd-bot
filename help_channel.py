@@ -37,7 +37,9 @@ async def acd(message):
         await attachment.save(attachment.filename)
         files.append(discord.File(fp=attachment.filename))
         os.remove(attachment.filename)
-    await channel.send(f"{message.author.mention} sent in {message.channel.mention}:\n{message.content}", files=files)
+    await channel.send(
+        f"{message.author.mention} sent in {message.channel.mention}:\n{message.content}",
+        files=files)
 
 
 async def repost(message):
@@ -49,10 +51,13 @@ async def repost(message):
                 with open(f"images/{file_name}", "rb") as f2:
                     is_repost = f1.read() == f2.read()
             if is_repost:
-                await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on posting questions.\n*This action was perfomed automatically.*")
+                await message.channel.send(
+                    f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on posting questions.\n*This action was perfomed automatically.*"
+                )
                 os.remove(attachment.filename)
                 return
-        os.rename(f"cache/{attachment.filename}", f"images/{attachment.filename}")
+        os.rename(f"cache/{attachment.filename}",
+                  f"images/{attachment.filename}")
     await asyncio.sleep(300)
     for attachment in message.attachments:
         try:
@@ -71,7 +76,10 @@ async def help_channel(message):
 
     ignore = ["practice", "review", "homework", "hw"]
 
-    flags = [ "quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments"]
+    flags = [
+        "quiz", "quizzes", "test", "tests", "exam", "exams", "assessment",
+        "assessments"
+    ]
 
     temp = message.content.lower().split()
     if "help" in temp:
