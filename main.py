@@ -25,7 +25,6 @@ bot = commands.Bot(command_prefix = '$',
 dev_ids = [736724275855228930, 444724485594152960, 275322364173221890]
 
 top_messages = {}
-repost_cache = {}
 
 
 class DbElement:
@@ -95,6 +94,7 @@ class Something: #idk what to call this
 
 
 dbThing = Something(db) #very bad name, must fix
+
 
 class TopMessagesElement:
     def __init__(self, page, member):
@@ -260,6 +260,20 @@ async def log_acd(message):
     await channel.send(f"{message.author.mention} sent in {message.channel.mention}:\n{message.content}", files = files)
 
 
+async def repost(message):
+    for attachment in message.attachments:
+        await attachment.save(attachment.filename)
+        for file_name in os.listdir("images"):
+            if open(attachment.filename,"rb").read() == open(f"images/{file_name}","rb").read():
+                await message.channel.send(f"{message.author.mention}, please don't repost questions\n*this action was perfomed automatically*")
+                os.remove(attachment.filename)
+                return
+        os.rename(attachment.filename, f"images/{attachment.filename}")
+    await asyncio.sleep(300)
+    for attachment in message.attachments:
+        os.remove(f"images/{attachment.filename}")
+
+
 async def acd(message):
     dbElement = dbThing.get(message.guild.id)
     if message.channel.id not in dbElement.help_channel_ids:
@@ -270,7 +284,7 @@ async def acd(message):
 
     ignore = ["practice", "review"]
 
-    flags = ["quiz", "test", "exam", "assessment"]
+    flags = ["quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments"]
 
     temp = message.content.lower().split()
     if "help" in temp:
@@ -282,6 +296,7 @@ async def acd(message):
             if word in temp:
                 await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed\n*this action was perfomed automatically*")
                 await log_acd(message)
+                await repost(message)
                 return
 
     if not len(message.attachments):
@@ -297,7 +312,10 @@ async def acd(message):
         if word in temp:
             await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed\n*this action was perfomed automatically*")
             await log_acd(message)
+            await repost(message)
             return
+
+    await repost(message)
 
 
 @bot.event
@@ -516,6 +534,11 @@ async def count_info(ctx):
 @bot.command()
 async def image_to_text(ctx):
     await send(ctx.channel, ' '.join(ocr(ctx.message)))
+
+
+@bot.command()
+async def image_to_text_raw(ctx):
+    await send(ctx.channel, f"```{ocr(ctx.message)}```")
 
 
 @bot.command()
