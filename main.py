@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from replit import db
 import asyncio
 import typing
 import os
@@ -197,13 +198,25 @@ async def count_info(ctx):
 
     ignored_roles = " ".join([f"<@&{role_id}>" for role_id in dbElement.ignored_roles])
     ignored_members = " ".join([f"<@{member_id}>" for member_id in dbElement.ignored_members])
-    embed = discord.Embed(title = "count info",
-                          description = f"channel: <#{dbElement.channel_id}>\n"
-                                        f"webhook id: `{dbElement.webhook_id}`\n"
-                                        f"count: `{dbElement.count}`\n"
-                                        f"last counter: <@{dbElement.last_counter}>\n"
-                                        f"ignored roles: {ignored_roles}\n"
-                                        f"ignored members: {ignored_members}")
+    embed = discord.Embed(title = "count info")
+    embed.add_field(name = "channel",
+                    value = f"<#{dbElement.channel_id}>\n",
+                    inline = False)
+    embed.add_field(name = "webhook id",
+                    value = f"`{dbElement.webhook_id}`",
+                    inline = False)
+    embed.add_field(name = "count",
+                    value = f"`{dbElement.count}`",
+                    inline = False)
+    embed.add_field(name = "last counter",
+                    value = f"<@{dbElement.last_counter}>\n",
+                    inline = False)
+    embed.add_field(name = "ignored roles",
+                    value = ignored_roles,
+                    inline = False)
+    embed.add_field(name = "ignored members",
+                    value = ignored_members,
+                    inline = False)
 
     await send(ctx.channel,
                "",

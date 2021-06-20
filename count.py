@@ -88,9 +88,11 @@ def top_embed(dbElement, member, page):
         temp = "left server" if member.guild.get_member(int(member_ids[i])) is None else f"<@{member_ids[i]}>"
         text += f"`{(page - 1) * 10 + i + 1}`. {temp} `{counts[i]}`\n"
 
+    temp = f"`{list(dbElement.ranking_dict.values()).index(dbElement.ranking_dict[str(member.id)])+1}`. {member.mention}: `{dbElement.ranking_dict[str(member.id)]}`" if str(member.id) in dbElement.ranking_dict else ""
+
     embed = discord.Embed(title = "top counters",
-                          description = f"`{list(dbElement.ranking_dict.values()).index(dbElement.ranking_dict[str(member.id)])+1 if   str(member.id) in dbElement.ranking_dict else -1}`. {member.mention}: `{dbElement.ranking_dict[str(member.id)] if str(member.id) in dbElement.ranking_dict else 0}`\n\n{text}")
-    embed.set_footer(text = f"page {page}/{len(dbElement.ranking_dict) // 10 + 1}")
+                          description = f"{temp}\n\n{text}")
+    embed.set_footer(text = f"{page}/{len(dbElement.ranking_dict) // 10 + 1}")
     return embed
 
 
