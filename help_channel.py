@@ -13,50 +13,49 @@ def ocr(message):
         if any(attachment.filename.endswith(image) for image in formats):
             payload = {"url": attachment.url, "apikey": os.getenv("OCR_KEY")}
             r = requests.post('https://api.ocr.space/parse/image',
-                              data=payload)
+                              data = payload)
             try:
-                temp.extend(
-                    json.loads(r.content.decode())["ParsedResults"][0]
-                    ["ParsedText"].lower().split())
+                temp.extend(json.loads(r.content.decode())["ParsedResults"][0]["ParsedText"].lower().split())
             except:
                 pass
     return temp
 
 
 async def acd(message):
-    await message.channel.send(
-        f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\nUse `?acd` for more information.\n*This action was perfomed automatically.*"
-    )
+    dbElement = dbThing.get(message.guild.id)
+    if dbElement.acd:
+        await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\nUse `?acd` for more information.\n*This action was perfomed automatically.*")
     #maybe actually don't hard code stuff
     channel = bot.get_guild(493173110799859713).get_channel(854918297505759283)
     files = []
     for attachment in message.attachments:
         await attachment.save(attachment.filename)
-        files.append(discord.File(fp=attachment.filename))
+        files.append(discord.File(fp = attachment.filename))
         os.remove(attachment.filename)
-    await channel.send(
-        f"{message.author.mention} sent in {message.channel.mention}:\n{message.content}",
-        files=files)
+    await channel.send(f"{message.author.mention} sent in {message.channel.mention}:\n{message.content}",
+                       files = files)
 
 
 async def repost(message):
     for attachment in message.attachments:
         await attachment.save(f"cache/{attachment.filename}")
         for file_name in os.listdir("images"):
-            if open(f"cache/{attachment.filename}",
-                    "rb").read() == open(f"images/{file_name}", "rb").read():
-                await message.channel.send(
-                    f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on posting questions.\n*This action was perfomed automatically.*"
-                )
+            temp = False
+            with open(f"cache/{attachment.filename}", "rb") as file1:
+                with open(f"images/{file_name}", "rb") as file2:
+                    temp = file1.read() == file2.read()
+            if temp:
+                dbElement = dbThing.get(message.guild.id)
+                if dbElement.repost:
+                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for question-asking guidelines.\n*This action was perfomed automatically.*")
                 os.remove(f"cache/{attachment.filename}")
                 return
-        os.rename(f"cache/{attachment.filename}",
-                  f"images/{attachment.filename}")
+        os.rename(f"cache/{attachment.filename}", f"images/{attachment.filename}")
     await asyncio.sleep(300)
     for attachment in message.attachments:
         try:
             os.remove(f"images/{attachment.filename}")
-        except:
+        except FileNotFoundError:
             pass
 
 
@@ -67,26 +66,22 @@ async def help_channel(message):
 
     if message.author.bot:
         return
-
+    
     if is_acd(message):
         await acd(message)
 
     await repost(message)
 
 
-#TODO: better algorithm
+#improve algorithm
 def is_acd(message):
     ignore = ["practice", "review", "homework", "hw"]
 
-    flags = [
-        "quiz", "quizzes", "test", "tests", "exam", "exams", "assessment",
-        "assessments"
-    ]
+    flags = ["quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments"]
 
     if len(message.attachments) == 0:
         return False
 
     temp = ocr(message)
 
-    return (not any(word in temp for word in ignore)
-            and any(word in temp for word in flags))
+    return not any(word in temp for word in ignore) and any(word in temp for word in flags)

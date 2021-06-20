@@ -8,14 +8,6 @@ from count import count, top_embed, count_reaction
 from funcs import send, send_yes, send_no
 from help_channel import ocr, help_channel
 
-#import logging
-#set up logging
-#maybe change this to logging.WARNING
-#logging.basicConfig(level = logging.INFO)
-
-#db format
-#db[guild id] = [channel id, webhook id, count, last counter, [ignored roles], [ignored members], {member id: times counted}, [help channel ids]]
-
 
 @bot.event
 async def on_ready():
@@ -24,7 +16,7 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    dbThing[guild.id] = DbElement(None, None, 0, None, [], dev_ids, {}, [])
+    dbThing[guild.id] = DbElement(None, None, 0, None, [], dev_ids, {}, [], False, False)
 
 
 @bot.event
@@ -57,7 +49,7 @@ async def on_command_error(ctx, error):
         await send_no(ctx.channel, "an error occured")
 
 
-# Counting commands
+#count commands
 
 
 @bot.command()
@@ -105,13 +97,12 @@ async def start_count(ctx,
 
     dbElement = dbThing.get(ctx.guild.id)
     dbElement.channel_id = channel.id
-    dbElement.webhook_id = (await channel.create_webhook(name=channel.name)).id
+    dbElement.webhook_id = (await channel.create_webhook(name = channel.name)).id
     if count is not None:
         dbElement.count = count
     dbThing[ctx.guild.id] = DbElement
 
-    await send_yes(ctx.channel,
-                   f"count started in {channel.mention} at `{count}`")
+    await send_yes(ctx.channel, f"count started in {channel.mention} at `{count}`")
 
 
 @bot.command()
@@ -157,10 +148,9 @@ async def ignore(ctx,
             dbElement.ignored_members.append(member.id)
     dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(
-        ctx.channel,
-        f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} ignored",
-        allowed_mentions=discord.AllowedMentions.none())
+    await send_yes(ctx.channel,
+                   f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} ignored",
+                   allowed_mentions = discord.AllowedMentions.none())
 
 
 @bot.command()
@@ -188,10 +178,9 @@ async def unignore(ctx,
             dbElement.ignored_members.remove(member.id)
     dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(
-        ctx.channel,
-        f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} unignored",
-        allowed_mentions=discord.AllowedMentions.none())
+    await send_yes(ctx.channel,
+                   f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} unignored",
+                   allowed_mentions = discord.AllowedMentions.none())
 
 
 @bot.command()
@@ -206,22 +195,22 @@ async def count_info(ctx):
         await send_no(ctx.channel, "no counting channel")
         return
 
-    ignored_roles = " ".join(
-        [f"<@&{role_id}>" for role_id in dbElement.ignored_roles])
-    ignored_members = " ".join(
-        [f"<@{member_id}>" for member_id in dbElement.ignored_members])
-    embed = discord.Embed(title="count info",
-                          description=f"channel: <#{dbElement.channel_id}>\n"
-                          f"webhook id: `{dbElement.webhook_id}`\n"
-                          f"count: `{dbElement.count}`\n"
-                          f"last counter: <@{dbElement.last_counter}>\n"
-                          f"ignored roles: {ignored_roles}\n"
-                          f"ignored members: {ignored_members}")
+    ignored_roles = " ".join([f"<@&{role_id}>" for role_id in dbElement.ignored_roles])
+    ignored_members = " ".join([f"<@{member_id}>" for member_id in dbElement.ignored_members])
+    embed = discord.Embed(title = "count info",
+                          description = f"channel: <#{dbElement.channel_id}>\n"
+                                        f"webhook id: `{dbElement.webhook_id}`\n"
+                                        f"count: `{dbElement.count}`\n"
+                                        f"last counter: <@{dbElement.last_counter}>\n"
+                                        f"ignored roles: {ignored_roles}\n"
+                                        f"ignored members: {ignored_members}")
 
-    await send(ctx.channel, "", embed=embed)
+    await send(ctx.channel,
+               "",
+               embed = embed)
 
 
-# Help channel commands
+#help channel commands
 
 
 @bot.command()
@@ -248,9 +237,7 @@ async def add_help_channel(ctx,
             dbElement.help_channel_ids.append(channel.id)
     dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(
-        ctx.channel,
-        f"added {' '.join([channel.mention for channel in channels])}")
+    await send_yes(ctx.channel, f"added {' '.join([channel.mention for channel in channels])}")
 
 
 @bot.command()
@@ -267,9 +254,7 @@ async def remove_help_channel(ctx,
             dbElement.help_channel_ids.remove(channel.id)
     dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(
-        ctx.channel,
-        f"removed {' '.join([channel.mention for channel in channels])}")
+    await send_yes(ctx.channel, f"removed {' '.join([channel.mention for channel in channels])}")
 
 
 @bot.command()
@@ -280,15 +265,67 @@ async def help_channels(ctx):
         return
 
     dbElement = dbThing.get(ctx.guild.id)
-    embed = discord.Embed(title="help channels",
-                          description="\n".join([
-                              f"<#{id}>" for id in dbElement.help_channel_ids
-                          ]))
+    embed = discord.Embed(title = "help channels",
+                          description = "\n".join([f"<#{id}>" for id in dbElement.help_channel_ids]))
 
-    await send(ctx.channel, "", embed=embed)
+    await send(ctx.channel,
+               "",
+               embed = embed)
 
 
-# Dev commands
+@bot.command()
+@commands.guild_only()
+async def acd(ctx,
+              text = None):
+    if ctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+    
+    dbElement = dbThing.get(ctx.guild.id)
+    if text == None:
+        if dbElement.acd:
+            text = "off"
+        else:
+            text = "on"
+    else:
+        text = text.lower()
+    if text == "on":
+        dbElement.acd = True
+    elif text == "off":
+        dbElement.acd = False
+    else:
+        return
+
+    await send_yes(ctx.channel, f"acd turned {text}")
+
+
+@bot.command()
+@commands.guild_only()
+async def repost(ctx,
+                 text = None):
+    if ctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+    
+    dbElement = dbThing.get(ctx.guild.id)
+    if text == None:
+        if dbElement.repost:
+            text = "off"
+        else:
+            text = "on"
+    else:
+        text = text.lower()
+    if text == "on":
+        dbElement.repost = True
+    elif text == "off":
+        dbElement.repost = False
+    else:
+        return
+
+    await send_yes(ctx.channel, f"repost turned {text}")
+
+
+#dev commands
 
 
 @bot.command(name='eval')

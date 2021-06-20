@@ -7,9 +7,12 @@ from replit import db
 dev_ids = [736724275855228930, 444724485594152960, 275322364173221890]
 top_messages = {}
 
+#db format
+#db[guild id] = [channel id, webhook id, count, last counter, [ignored roles], [ignored members], {member id: times counted}, [help channel ids], acd, repost]
+
 
 class DbElement:
-    def __init__(self, channel_id, webhook_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids):
+    def __init__(self, channel_id, webhook_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost):
         self.channel_id = channel_id
         self.webhook_id = webhook_id
         self.count = count
@@ -18,13 +21,15 @@ class DbElement:
         self.ignored_members = list(ignored_members)
         self.ranking_dict = dict(ranking_dict)
         self.help_channel_ids = list(help_channel_ids)
+        self.acd = acd
+        self.repost = repost
 
     @classmethod
     def from_db_element(cls, element):
         return cls(*element)
 
     def to_db_element(self):
-        return (self.channel_id, self.webhook_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members,  self.ranking_dict, self.help_channel_ids)
+        return (self.channel_id, self.webhook_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members, self.ranking_dict, self.help_channel_ids, self.acd, self.repost)
 
 
 class DbElementWithLock:
