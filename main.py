@@ -283,20 +283,18 @@ async def acd(ctx,
     
     dbElement = dbThing.get(ctx.guild.id)
     if text == None:
-        if dbElement.acd:
-            text = "off"
-        else:
-            text = "on"
+        dbElement.acd = not dbElement.acd
     else:
         text = text.lower()
-    if text == "on":
-        dbElement.acd = True
-    elif text == "off":
-        dbElement.acd = False
-    else:
-        return
+        if text == "enable":
+            dbElement.acd = True
+        elif text == "disable":
+            dbElement.acd = False
+        else:
+            return
+    dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(ctx.channel, f"acd turned {text}")
+    await send_yes(ctx.channel, f"acd {'enabled' if dbElement.acd else 'disabled'}")
 
 
 @bot.command()
@@ -309,20 +307,18 @@ async def repost(ctx,
     
     dbElement = dbThing.get(ctx.guild.id)
     if text == None:
-        if dbElement.repost:
-            text = "off"
-        else:
-            text = "on"
+        dbElement.repost = not dbElement.repost
     else:
         text = text.lower()
-    if text == "on":
-        dbElement.repost = True
-    elif text == "off":
-        dbElement.repost = False
-    else:
-        return
+        if text == "enable":
+            dbElement.repost = True
+        elif text == "disable":
+            dbElement.repost = False
+        else:
+            return
+    dbThing[ctx.guild.id] = dbElement
 
-    await send_yes(ctx.channel, f"repost turned {text}")
+    await send_yes(ctx.channel, f"repost {'enabled' if dbElement.acd else 'disabled'}")
 
 
 #dev commands

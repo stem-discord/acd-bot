@@ -1,5 +1,6 @@
 import asyncio
 from classes import dbThing
+import discord
 
 
 async def send(channel, text, **kwargs):
@@ -12,7 +13,7 @@ async def send(channel, text, **kwargs):
     await asyncio.sleep(3)
     try:
         await message.delete()
-    except:
+    except discord.errors.NotFound:
         pass
 
     return message
