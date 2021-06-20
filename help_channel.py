@@ -59,6 +59,17 @@ async def repost(message):
             pass
 
 
+#improve algorithm
+def is_acd(message):
+    ignore = ["practice", "review", "homework", "hw"]
+
+    flags = ["quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments"]
+
+    temp = ocr(message)
+
+    return not any(word in temp for word in ignore) and any(word in temp for word in flags)
+
+
 async def help_channel(message):
     dbElement = dbThing.get(message.guild.id)
     if message.channel.id not in dbElement.help_channel_ids:
@@ -66,22 +77,11 @@ async def help_channel(message):
 
     if message.author.bot:
         return
+
+    if not len(message.attachments):
+        return
     
     if is_acd(message):
         await acd(message)
 
     await repost(message)
-
-
-#improve algorithm
-def is_acd(message):
-    ignore = ["practice", "review", "homework", "hw"]
-
-    flags = ["quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments"]
-
-    if len(message.attachments) == 0:
-        return False
-
-    temp = ocr(message)
-
-    return not any(word in temp for word in ignore) and any(word in temp for word in flags)
