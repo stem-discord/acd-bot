@@ -334,6 +334,10 @@ async def repost(ctx,
     await send_yes(ctx.channel, f"repost {'enabled' if dbElement.acd else 'disabled'}")
 
 
+#utility commands
+
+
+
 #dev commands
 
 
@@ -360,6 +364,13 @@ async def _exec(ctx, *, text):
         await send_yes(ctx.channel, "executed")
     except Exception as exception:
         await send(ctx.channel, f"```\n{exception}```")
+
+
+#clear image_cache before running
+#in case there were leftover images from last time that weren't deleted
+
+for file_name in os.listdir("image_cache"):
+	os.remove(f"image_cache/{file_name}")
 
 
 bot.run(os.getenv('TOKEN'))

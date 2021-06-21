@@ -24,7 +24,7 @@ def ocr(message):
 async def acd(message):
     dbElement = dbThing.get(message.guild.id)
     if dbElement.acd:
-        await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\nUse `?acd` for more information.\n*This action was perfomed automatically.*")
+        await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\nUse `?acd` for more information.\n*This action was performed automatically.*")
     #maybe actually don't hard code stuff
     channel = bot.get_guild(493173110799859713).get_channel(854918297505759283)
     embed = discord.Embed(title = "acd", url = message.jump_url)
@@ -34,9 +34,10 @@ async def acd(message):
     embed.add_field(name = "channel",
                     value = message.channel.mention,
                     inline = False)
-    embed.add_field(name = "content",
-                    value = message.content,
-                    inline = False)
+    if len(message.content):
+        embed.add_field(name = "content",
+                        value = message.content,
+                        inline = False)
     await channel.send(embed = embed)
     files = []
     for attachment in message.attachments:
@@ -57,7 +58,7 @@ async def repost(message):
             if temp:
                 dbElement = dbThing.get(message.guild.id)
                 if dbElement.repost:
-                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for question-asking guidelines.\n*This action was perfomed automatically.*")
+                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for question-asking guidelines.\n*This action was performed automatically.*")
                 os.remove(f"temp/{attachment.filename}")
                 return
         os.rename(f"temp/{attachment.filename}", f"image_cache/{attachment.filename}")
