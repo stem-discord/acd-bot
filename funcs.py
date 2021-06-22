@@ -25,3 +25,7 @@ async def send_yes(channel, text, **kwargs):
 
 async def send_no(channel, text, **kwargs):
     await send(channel, f"<a:symbol_wrong:666800714991009792> {text}", **kwargs)
+
+
+def has_perms(message, dbElement):
+    return any(role.id in dbElement.perms_roles for role in message.author.roles)

@@ -6,7 +6,7 @@ import typing
 import os
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
 from count import count, top_embed, count_reaction
-from funcs import send, send_yes, send_no
+from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
 
 
@@ -89,7 +89,8 @@ async def top(ctx, member: discord.Member = None):
 async def start_count(ctx,
                       channel: typing.Optional[discord.TextChannel] = None,
                       count: int = None):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -109,7 +110,8 @@ async def start_count(ctx,
 @bot.command()
 @commands.guild_only()
 async def set_count(ctx, count: int):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -187,7 +189,8 @@ async def unignore(ctx,
 @bot.command()
 @commands.guild_only()
 async def count_info(ctx):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -227,20 +230,11 @@ async def count_info(ctx):
 
 
 @bot.command()
-async def image_to_text(ctx):
-    await send(ctx.channel, ' '.join(ocr(ctx.message)))
-
-
-@bot.command()
-async def image_to_text_raw(ctx):
-    await send(ctx.channel, f"```{ocr(ctx.message)}```")
-
-
-@bot.command()
 @commands.guild_only()
 async def add_help_channel(ctx,
                            channels: commands.Greedy[discord.TextChannel]):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -257,7 +251,8 @@ async def add_help_channel(ctx,
 @commands.guild_only()
 async def remove_help_channel(ctx,
                               channels: commands.Greedy[discord.TextChannel]):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -273,7 +268,8 @@ async def remove_help_channel(ctx,
 @bot.command()
 @commands.guild_only()
 async def help_channels(ctx):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
@@ -290,7 +286,8 @@ async def help_channels(ctx):
 @commands.guild_only()
 async def acd(ctx,
               text = None):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
     
@@ -314,7 +311,8 @@ async def acd(ctx,
 @commands.guild_only()
 async def repost(ctx,
                  text = None):
-    if ctx.author.id not in dev_ids:
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
     
@@ -337,8 +335,71 @@ async def repost(ctx,
 #utility commands
 
 
+@bot.command()
+async def image_to_text(ctx):
+    await send(ctx.channel, ' '.join(ocr(ctx.message)))
+
+
+@bot.command()
+@commands.guild_only()
+async def members(ctx,
+                  role: discord.Role):
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.authorctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+
+    temp = " ".join([member.mention for member in role.members])
+    await send(ctx.channel,
+               f"members in {role.mention}\n{temp}",
+               allowed_mentions = discord.AllowedMentions.none())
+
 
 #dev commands
+
+
+@bot.command()
+@commands.guild_only()
+async def perms(ctx,
+                roles: commands.Greedy[discord.Role] = []):
+    if ctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+
+    if not len(roles):
+        return
+
+    dbElement = dbThing.get(ctx.guild.id)
+    for role in roles:
+        if role.id not in dbElement.perms_roles:
+            dbElement.perms_roles.append(role.id)
+    dbThing[ctx.guild.id] = dbElement
+
+    await send_yes(ctx.channel,
+                   f"{' '.join([role.mention for role in roles])} {'were' if len(roles) > 1 else 'was'} given perms",
+                   allowed_mentions = discord.AllowedMentions.none())
+
+
+@bot.command()
+@commands.guild_only()
+async def remove_perms(ctx,
+                       roles: commands.Greedy[discord.Role] = []):
+    if ctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+
+    if not len(roles):
+        return
+
+    dbElement = dbThing.get(ctx.guild.id)
+    for role in roles:
+        if role.id not in dbElement.perms_roles:
+            dbElement.perms_roles.remove(role.id)
+    dbThing[ctx.guild.id] = dbElement
+
+    await send_yes(ctx.channel,
+                   f"removed perms from {' '.join([role.mention for role in roles])}",
+                   allowed_mentions = discord.AllowedMentions.none())
 
 
 @bot.command(name='eval')
@@ -367,10 +428,7 @@ async def _exec(ctx, *, text):
 
 
 #clear image_cache before running
-#in case there were leftover images from last time that weren't deleted
-
 for file_name in os.listdir("image_cache"):
 	os.remove(f"image_cache/{file_name}")
-
 
 bot.run(os.getenv('TOKEN'))

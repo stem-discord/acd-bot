@@ -58,7 +58,7 @@ async def repost(message):
             if temp:
                 dbElement = dbThing.get(message.guild.id)
                 if dbElement.repost:
-                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for question-asking guidelines.\n*This action was performed automatically.*")
+                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on asking questions.\n*This action was performed automatically.*")
                 os.remove(f"temp/{attachment.filename}")
                 return
         os.rename(f"temp/{attachment.filename}", f"image_cache/{attachment.filename}")
