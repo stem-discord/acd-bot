@@ -1,6 +1,6 @@
 import discord
-import os
 import asyncio
+import os
 import requests
 import json
 from classes import dbThing, bot

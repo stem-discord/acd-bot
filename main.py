@@ -1,14 +1,15 @@
 import discord
 from discord.ext import commands
-from replit import db
 import asyncio
-import typing
 import os
-import fuckit
+from typing import Optional
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
 from count import count, top_embed, count_reaction
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
+#for eval and exec stuff
+from replit import db
+import fuckit
 
 
 @bot.event
@@ -91,7 +92,7 @@ async def top(ctx,
 @bot.command()
 @commands.guild_only()
 async def start_count(ctx,
-                      channel: typing.Optional[discord.TextChannel] = None,
+                      channel: Optional[discord.TextChannel] = None,
                       count: int = None):
     dbElement = dbThing.get(ctx.guild.id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:

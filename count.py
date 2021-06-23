@@ -1,21 +1,6 @@
 import discord
-import asyncio
 from classes import dbThing, bot, top_messages
-
-
-async def warn(message, text):
-    try:
-        await message.delete()
-    except:
-        pass
-
-    warning = await message.channel.send(f"{message.author.mention}, {text}!")
-    await asyncio.sleep(3)
-
-    try:
-        await warning.delete()
-    except:
-        pass
+from funcs import warn
 
 
 def has_ignored_role(message, dbElement):

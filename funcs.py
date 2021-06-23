@@ -1,6 +1,6 @@
+import discord
 import asyncio
 from classes import dbThing
-import discord
 
 
 async def send(channel, text, **kwargs):
@@ -29,3 +29,18 @@ async def send_no(channel, text, **kwargs):
 
 def has_perms(message, dbElement):
     return any(role.id in dbElement.perms_roles for role in message.author.roles)
+
+
+async def warn(message, text):
+    try:
+        await message.delete()
+    except:
+        pass
+
+    warning = await message.channel.send(f"{message.author.mention}, {text}!")
+    await asyncio.sleep(3)
+
+    try:
+        await warning.delete()
+    except:
+        pass
