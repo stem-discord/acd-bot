@@ -81,12 +81,12 @@ async def count(message):
 
 
 def top_embed(dbElement, member, page):
-    member_ids = list(dbElement.ranking_dict.keys())[10 * (page - 1):10 * page]
-    counts = list(dbElement.ranking_dict.values())[10 * (page - 1):10 * page]
+    member_ids = list(dbElement.ranking_dict.keys())[10 * (page-1):10 * page]
+    counts = list(dbElement.ranking_dict.values())[10 * (page-1):10 * page]
     text = ""
     for i in range(len(member_ids)):
         temp = "left server" if member.guild.get_member(int(member_ids[i])) is None else f"<@{member_ids[i]}>"
-        text += f"`{(page - 1) * 10 + i + 1}`. {temp} `{counts[i]}`\n"
+        text += f"`{(page-1) * 10 + i+1}`. {temp} `{counts[i]}`\n"
 
     temp = f"`{list(dbElement.ranking_dict.values()).index(dbElement.ranking_dict[str(member.id)])+1}`. {member.mention} `{dbElement.ranking_dict[str(member.id)]}`" if str(member.id) in dbElement.ranking_dict else ""
 

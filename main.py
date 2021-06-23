@@ -55,7 +55,8 @@ async def on_command_error(ctx, error):
 
 @bot.command()
 @commands.guild_only()
-async def top(ctx, member: discord.Member = None):
+async def top(ctx,
+              member: discord.Member = None):
     if member is None:
         member = ctx.author
 
@@ -65,7 +66,9 @@ async def top(ctx, member: discord.Member = None):
         return
 
     embed = top_embed(dbElement, member, 1)
-    message = await send(ctx.channel, "", embed=embed)
+    message = await send(ctx.channel,
+                         "",
+                         embed = embed)
 
     await message.add_reaction("⏪")
     await message.add_reaction("◀️")
@@ -109,7 +112,8 @@ async def start_count(ctx,
 
 @bot.command()
 @commands.guild_only()
-async def set_count(ctx, count: int):
+async def set_count(ctx,
+                    count: int):
     dbElement = dbThing.get(ctx.guild.id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -332,12 +336,50 @@ async def repost(ctx,
     await send_yes(ctx.channel, f"repost {'enabled' if dbElement.acd else 'disabled'}")
 
 
+#moderation commands
+
+
+@bot.command()
+@commands.guild_only()
+async def hide_channel(ctx,
+                       channels: commands.Greedy[discord.TextChannel] = [],
+                       roles: commands.Greedy[discord.Role] = [],
+                       members: commands.Greedy[discord.Member] = []):
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+    
+    if not len(channels):
+        channels = [ctx.channel]
+    if not len(roles) and not len(members):
+        roles = [ctx.guild.default_role]
+
+    for channel in channels:
+        overwrites = channel.overwrites
+        if len(roles):
+            for role in roles:
+                overwrite = channel.overwrites_for(role)
+                overwrite.view_channel = False
+                overwrites[role] = overwrite
+        if len(members):
+            for member in members:
+                overwrite = channel.overwrites_for(member)
+                overwrite.view_channel = False
+                overwrites[member] = overwrite
+        await channel.edit(overwrites = overwrites)
+
+    await send_yes(ctx.channel,
+                   f"{' '.join([channel.mention for channel in channels])} {'was' if len(channels) == 1 else 'were'} hidden from {' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members]) if len(members) else ''}",
+                   allowed_mentions=discord.AllowedMentions.none())
+
+
 #utility commands
 
 
 @bot.command()
 async def image_to_text(ctx):
-    await send(ctx.channel, ' '.join(ocr(ctx.message)))
+    await send(ctx.channel, " ".join(ocr(ctx.message)))
 
 
 @bot.command()
@@ -361,7 +403,7 @@ async def members(ctx,
 @bot.command()
 @commands.guild_only()
 async def perms(ctx,
-                roles: commands.Greedy[discord.Role] = []):
+                roles: commands.Greedy[discord.Role]):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
@@ -383,7 +425,7 @@ async def perms(ctx,
 @bot.command()
 @commands.guild_only()
 async def remove_perms(ctx,
-                       roles: commands.Greedy[discord.Role] = []):
+                       roles: commands.Greedy[discord.Role]):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
@@ -402,7 +444,7 @@ async def remove_perms(ctx,
                    allowed_mentions = discord.AllowedMentions.none())
 
 
-@bot.command(name='eval')
+@bot.command(name="eval")
 async def _eval(ctx, *, text):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -414,7 +456,7 @@ async def _eval(ctx, *, text):
         await send(ctx.channel, f"```\n{exception}```")
 
 
-@bot.command(name='exec')
+@bot.command(name="exec")
 async def _exec(ctx, *, text):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -431,4 +473,4 @@ async def _exec(ctx, *, text):
 for file_name in os.listdir("image_cache"):
 	os.remove(f"image_cache/{file_name}")
 
-bot.run(os.getenv('TOKEN'))
+bot.run(os.getenv("TOKEN"))
