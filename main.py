@@ -4,6 +4,7 @@ from replit import db
 import asyncio
 import typing
 import os
+import fuckit
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
 from count import count, top_embed, count_reaction
 from funcs import send, send_yes, send_no, has_perms
@@ -371,7 +372,34 @@ async def hide_channel(ctx,
 
     await send_yes(ctx.channel,
                    f"{' '.join([channel.mention for channel in channels])} {'was' if len(channels) == 1 else 'were'} hidden from {' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members]) if len(members) else ''}",
-                   allowed_mentions=discord.AllowedMentions.none())
+                   allowed_mentions = discord.AllowedMentions.none())
+
+
+@bot.command()
+@commands.guild_only()
+async def purge(ctx,
+                channels: commands.Greedy[discord.TextChannel] = [],
+                members: commands.Greedy[discord.Member] = [],
+                num: int = None):
+    if num == None:
+        return
+    if not len(channels):
+        channels = [ctx.channel]
+
+    try:
+        await ctx.message.delete()
+    except:
+        pass
+
+    if len(members):
+        for channel in channels:
+            for member in members:
+                await channel.purge(limit = num,
+                                    check = lambda message: message.author == member)
+        return
+
+    for channel in channels:
+        await channel.purge(limit = num)
 
 
 #utility commands
@@ -391,7 +419,7 @@ async def members(ctx,
         await send_no(ctx.channel, "missing permissions")
         return
 
-    temp = " ".join([member.mention for member in role.members])
+    temp = "\n".join([member.mention for member in role.members])
     await send(ctx.channel,
                f"members in {role.mention}\n{temp}",
                allowed_mentions = discord.AllowedMentions.none())
