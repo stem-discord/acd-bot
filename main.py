@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import asyncio
 import os
+import random
 from typing import Optional
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
 from count import count, top_embed, count_reaction
@@ -404,6 +405,20 @@ async def purge(ctx,
 
 
 #utility commands
+
+
+@bot.command()
+@commands.guild_only()
+async def randomize(ctx):
+    if ctx.guild.id == 493173110799859713:
+        role = bot.get_guild(493173110799859713).get_role(851931290776240208)
+        if role in ctx.author.roles:
+            color = random.randint(0, 0xffffff)
+            await role.edit(color=color)
+            await send_yes(ctx.channel, "color randomized")
+            return
+
+        await send_no(ctx.channel, "missing permissions")
 
 
 @bot.command()
