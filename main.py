@@ -499,14 +499,18 @@ async def _eval(ctx, *, text):
         return
 
     try:
-        with open("eval.txt", "w") as file:
-            file.write(str(eval(text)))
-        await send(ctx.channel,
-                   "",
-                   file = discord.File(fp = "eval.txt"))
-        os.remove("eval.txt")
+        result = str(eval(text))
     except Exception as exception:
         await send(ctx.channel, f"```\n{exception}```")
+    else:
+        try:
+            with open("eval.txt", "w") as file:
+                file.write(str(eval(text)))
+            await send(ctx.channel,
+                       "",
+                       file = discord.File(fp = "eval.txt"))
+        finally:
+            os.remove("eval.txt")
 
 
 @bot.command(name="exec")
