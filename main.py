@@ -505,7 +505,7 @@ async def _eval(ctx, *, text):
     else:
         try:
             with open("eval.txt", "w") as file:
-                file.write(str(eval(text)))
+                file.write(result)
             await send(ctx.channel,
                        "",
                        file = discord.File(fp = "eval.txt"))
