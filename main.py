@@ -12,7 +12,6 @@ from help_channel import ocr, help_channel
 from replit import db
 import fuckit
 
-
 @bot.event
 async def on_ready():
     print("online")
@@ -383,6 +382,11 @@ async def purge(ctx,
                 channels: commands.Greedy[discord.TextChannel] = [],
                 members: commands.Greedy[discord.Member] = [],
                 num: int = None):
+    dbElement = dbThing.get(ctx.guild.id)
+    if not has_perms(ctx.message, dbElement) and ctx.authorctx.author.id not in dev_ids:
+        await send_no(ctx.channel, "missing permissions")
+        return
+    
     if num == None:
         return
     if not len(channels):
@@ -414,7 +418,7 @@ async def randomize(ctx):
         role = bot.get_guild(493173110799859713).get_role(851931290776240208)
         if role in ctx.author.roles:
             color = random.randint(0, 0xffffff)
-            await role.edit(color=color)
+            await role.edit(color = color)
             await send_yes(ctx.channel, "color randomized")
             return
 
@@ -495,7 +499,12 @@ async def _eval(ctx, *, text):
         return
 
     try:
-        await send(ctx.channel, f"```py\n{eval(text)}```")
+        with open("eval.txt", "w") as file:
+            file.write(str(eval(text)))
+        await send(ctx.channel,
+                   "",
+                   file = discord.File(fp = "eval.txt"))
+        os.remove("eval.txt")
     except Exception as exception:
         await send(ctx.channel, f"```\n{exception}```")
 
