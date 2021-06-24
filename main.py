@@ -69,7 +69,6 @@ async def top(ctx,
 
     embed = top_embed(dbElement, member, 1)
     message = await send(ctx.channel,
-                         "",
                          embed = embed)
 
     await message.add_reaction("⏪")
@@ -228,7 +227,6 @@ async def count_info(ctx):
                     inline = False)
 
     await send(ctx.channel,
-               "",
                embed = embed)
 
 
@@ -284,7 +282,6 @@ async def help_channels(ctx):
                           description = "\n".join([f"<#{id}>" for id in dbElement.help_channel_ids]))
 
     await send(ctx.channel,
-               "",
                embed = embed)
 
 
@@ -507,7 +504,6 @@ async def _eval(ctx, *, text):
             with open("eval.txt", "w") as file:
                 file.write(result)
             await send(ctx.channel,
-                       "",
                        file = discord.File(fp = "eval.txt"))
         finally:
             os.remove("eval.txt")

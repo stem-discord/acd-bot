@@ -3,8 +3,8 @@ import asyncio
 from classes import dbThing
 
 
-async def send(channel, text, **kwargs):
-    message = await channel.send(text, **kwargs)
+async def send(channel, content=None, **kwargs):
+    message = await channel.send(content, **kwargs)
 
     dbElement = dbThing.get(channel.guild.id)
     if dbElement.channel_id != channel.id:
@@ -19,12 +19,12 @@ async def send(channel, text, **kwargs):
     return message
 
 
-async def send_yes(channel, text, **kwargs):
-    await send(channel, f"<a:symbol_right:666800714483236864> {text}", **kwargs)
+async def send_yes(channel, content, **kwargs):
+    await send(channel, f"<a:symbol_right:666800714483236864> {content}", **kwargs)
 
 
-async def send_no(channel, text, **kwargs):
-    await send(channel, f"<a:symbol_wrong:666800714991009792> {text}", **kwargs)
+async def send_no(channel, content, **kwargs):
+    await send(channel, f"<a:symbol_wrong:666800714991009792> {content}", **kwargs)
 
 
 def has_perms(message, dbElement):
