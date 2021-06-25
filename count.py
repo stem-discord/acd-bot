@@ -1,5 +1,5 @@
 import discord
-from classes import dbThing, bot, top_messages
+from classes import dbThing, top_messages
 from funcs import warn
 
 
@@ -10,9 +10,6 @@ def has_ignored_role(message, dbElement):
 async def count(message):
     dbElement = dbThing.get(message.guild.id)
     if dbElement.channel_id != message.channel.id:
-        return
-
-    if message.webhook_id is not None:
         return
 
     if message.author.bot:
@@ -43,16 +40,6 @@ async def count(message):
             await warn(message, "please count in order")
             return
 
-        try:
-            await message.delete()
-        except:
-            pass
-
-        webhook = await bot.fetch_webhook(dbElement.webhook_id)
-        await webhook.send(content = message.content,
-                           username = message.author.display_name,
-                           avatar_url = message.author.avatar_url)
-
         dbElement.count += 1
         dbElement.last_counter = message.author.id
         if str(message.author.id) in dbElement.ranking_dict:
@@ -63,6 +50,22 @@ async def count(message):
                                              key = lambda item: item[1],
                                              reverse = True))
         dbThing[message.guild.id] = dbElement
+
+
+async def edit_count(before):
+    dbElement = dbThing.get(before.guild.id)
+    if dbElement.channel_id != before.channel.id:
+        return
+    
+    if dbElement.count - int(before.content) < 3:
+        await before.channel.purge(limit = [message.id for message in await before.channel.history().flatten()].index(before.id)+1)
+        await warn(before, "please don't edit messages")
+        dbElement.count = int(before.content) - 1
+        dbThing[before.guild.id] = dbElement
+    else:
+        await warn(before,
+                   "please don't edit messages",
+                   delete = False)
 
 
 def top_embed(dbElement, member, page):

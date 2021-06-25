@@ -4,17 +4,16 @@ import asyncio
 import copy
 from replit import db
 
-dev_ids = [736724275855228930, 444724485594152960, 275322364173221890]
+dev_ids = [736724275855228930, 444724485594152960, 275322364173221890, 341446613056880641]
 top_messages = {}
 
 #db format
-#db[guild id] = [channel id, webhook id, count, last counter, [ignored roles], [ignored members], {member id: times counted}, [help channel ids], acd, repost, [perms roles]]
+#db[guild id] = [channel id, count, last counter, [ignored roles], [ignored members], {member id: times counted}, [help channel ids], acd, repost, [perms roles]]
 
 
 class DbElement:
-    def __init__(self, channel_id, webhook_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost, perms_roles):
+    def __init__(self, channel_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost, perms_roles):
         self.channel_id = channel_id
-        self.webhook_id = webhook_id
         self.count = count
         self.last_counter = last_counter
         self.ignored_roles = list(ignored_roles)
@@ -30,7 +29,7 @@ class DbElement:
         return cls(*element)
 
     def to_db_element(self):
-        return (self.channel_id, self.webhook_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members, self.ranking_dict, self.help_channel_ids, self.acd, self.repost, self.perms_roles)
+        return (self.channel_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members, self.ranking_dict, self.help_channel_ids, self.acd, self.repost, self.perms_roles)
 
 
 class DbElementWithLock:
@@ -39,7 +38,7 @@ class DbElementWithLock:
         self.lock = asyncio.Lock()
 
 
-class Something:  #idk what to call this
+class Something: #idk what to call this
     def __init__(self, db):
         self.db = db
         self._cache = {}

@@ -3,7 +3,9 @@ import asyncio
 from classes import dbThing
 
 
-async def send(channel, content=None, **kwargs):
+async def send(channel,
+               content = None,
+               **kwargs):
     message = await channel.send(content, **kwargs)
 
     dbElement = dbThing.get(channel.guild.id)
@@ -31,11 +33,14 @@ def has_perms(message, dbElement):
     return any(role.id in dbElement.perms_roles for role in message.author.roles)
 
 
-async def warn(message, text):
-    try:
-        await message.delete()
-    except:
-        pass
+async def warn(message,
+               text,
+               delete = True):
+    if delete:
+        try:
+            await message.delete()
+        except:
+            pass
 
     warning = await message.channel.send(f"{message.author.mention}, {text}!")
     await asyncio.sleep(3)

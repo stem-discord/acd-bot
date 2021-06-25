@@ -5,12 +5,14 @@ import os
 import random
 from typing import Optional
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
-from count import count, top_embed, count_reaction
+from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
+#from one_word_story import one_word_story
 #for eval and exec stuff
 from replit import db
 import fuckit
+
 
 @bot.event
 async def on_ready():
@@ -24,17 +26,17 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
-    if message.author == bot.user:
-        return
     await count(message)
-    await help_channel(message)
+    #await one_word_story(message)
     if not message.author.bot:
+        await help_channel(message)
         await bot.process_commands(message)
 
 
 @bot.event
 async def on_message_edit(before, after):
     if not after.author.bot:
+        await edit_count(before)
         await bot.process_commands(after)
 
 
@@ -103,7 +105,6 @@ async def start_count(ctx,
 
     dbElement = dbThing.get(ctx.guild.id)
     dbElement.channel_id = channel.id
-    dbElement.webhook_id = (await channel.create_webhook(name = channel.name)).id
     if count is not None:
         dbElement.count = count
     dbThing[ctx.guild.id] = DbElement
@@ -209,9 +210,6 @@ async def count_info(ctx):
     embed = discord.Embed(title = "count info")
     embed.add_field(name = "channel",
                     value = f"<#{dbElement.channel_id}>\n",
-                    inline = False)
-    embed.add_field(name = "webhook id",
-                    value = f"`{dbElement.webhook_id}`",
                     inline = False)
     embed.add_field(name = "count",
                     value = f"`{dbElement.count}`",
@@ -408,7 +406,7 @@ async def purge(ctx,
 #utility commands
 
 
-@bot.command(aliases=["randomise"])
+@bot.command(aliases = ["randomise"])
 @commands.guild_only()
 async def randomize(ctx):
     if ctx.guild.id == 493173110799859713:

@@ -86,9 +86,6 @@ async def help_channel(message):
     if message.channel.id not in dbElement.help_channel_ids:
         return
 
-    if message.author.bot:
-        return
-
     if not len(message.attachments):
         return
     
