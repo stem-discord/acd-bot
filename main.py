@@ -408,7 +408,7 @@ async def purge(ctx,
 #utility commands
 
 
-@bot.command()
+@bot.command(aliases=["randomise"])
 @commands.guild_only()
 async def randomize(ctx):
     if ctx.guild.id == 493173110799859713:
