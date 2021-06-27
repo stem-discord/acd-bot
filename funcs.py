@@ -15,7 +15,7 @@ async def send(channel,
     await asyncio.sleep(3)
     try:
         await message.delete()
-    except discord.errors.NotFound:
+    except:
         pass
 
     return message

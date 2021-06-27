@@ -7,9 +7,6 @@ from replit import db
 dev_ids = [736724275855228930, 444724485594152960, 275322364173221890, 341446613056880641]
 top_messages = {}
 
-#db format
-#db[guild id] = [channel id, count, last counter, [ignored roles], [ignored members], {member id: times counted}, [help channel ids], acd, repost, [perms roles]]
-
 
 class DbElement:
     def __init__(self, channel_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost, perms_roles):

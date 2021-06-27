@@ -7,7 +7,7 @@ from classes import dbThing, bot
 
 
 def ocr(message):
-    formats = ['png', 'jpg', 'jpeg']
+    formats = ('png', 'jpg', 'jpeg')
     temp = []
     for attachment in message.attachments:
         if any(attachment.filename.endswith(image) for image in formats):
@@ -25,6 +25,7 @@ async def acd(message):
     dbElement = dbThing.get(message.guild.id)
     if dbElement.acd:
         await message.channel.send(f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\nUse `?acd` for more information.\n*This action was performed automatically.*")
+    
     #maybe actually don't hard code stuff
     channel = bot.get_guild(493173110799859713).get_channel(854918297505759283)
     embed = discord.Embed(title = "acd", url = message.jump_url)
@@ -34,39 +35,43 @@ async def acd(message):
     embed.add_field(name = "channel",
                     value = message.channel.mention,
                     inline = False)
-    if len(message.content):
+    content = message.content
+    if len(content):
         embed.add_field(name = "content",
-                        value = message.content,
+                        value = content,
                         inline = False)
     await channel.send(embed = embed)
+
     files = []
     for attachment in message.attachments:
-        await attachment.save(attachment.filename)
-        files.append(discord.File(fp = attachment.filename))
-        os.remove(attachment.filename)
+        file_name = attachment.filename
+        await attachment.save(file_name)
+        files.append(discord.File(fp = file_name))
+        os.remove(file_name)
     await channel.send(files = files)
 
 
 async def repost(message):
     for attachment in message.attachments:
-        await attachment.save(f"temp/{attachment.filename}")
-        for file_name in os.listdir("image_cache"):
+        file_name = attachment.filename
+        await attachment.save(f"temp/{file_name}")
+        for image_name in os.listdir("image_cache"):
             temp = False
-            with open(f"temp/{attachment.filename}", "rb") as file1:
-                with open(f"image_cache/{file_name}", "rb") as file2:
+            with open(f"temp/{file_name}", "rb") as file1:
+                with open(f"image_cache/{image_name}", "rb") as file2:
                     temp = file1.read() == file2.read()
             if temp:
                 dbElement = dbThing.get(message.guild.id)
                 if dbElement.repost:
                     await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on asking questions.\n*This action was performed automatically.*")
-                os.remove(f"temp/{attachment.filename}")
+                os.remove(f"temp/{file_name}")
                 return
-        os.rename(f"temp/{attachment.filename}", f"image_cache/{attachment.filename}")
+        os.rename(f"temp/{file_name}", f"image_cache/{file_name}")
     await asyncio.sleep(300)
     for attachment in message.attachments:
         try:
             os.remove(f"image_cache/{attachment.filename}")
-        except FileNotFoundError:
+        except:
             pass
 
 

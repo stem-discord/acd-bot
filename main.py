@@ -8,10 +8,8 @@ from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_me
 from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
-#from one_word_story import one_word_story
 #for eval and exec stuff
 from replit import db
-import fuckit
 
 
 @bot.event
@@ -21,13 +19,12 @@ async def on_ready():
 
 @bot.event
 async def on_guild_join(guild):
-    dbThing[guild.id] = DbElement(None, None, 0, None, [], dev_ids, {}, [], False, False)
+    dbThing[guild.id] = DbElement(None, 0, None, [], dev_ids, {}, [], False, False, [])
 
 
 @bot.event
 async def on_message(message):
     await count(message)
-    #await one_word_story(message)
     if not message.author.bot:
         await help_channel(message)
         await bot.process_commands(message)
@@ -61,31 +58,27 @@ async def on_command_error(ctx, error):
 @commands.guild_only()
 async def top(ctx,
               member: discord.Member = None):
-    if member is None:
-        member = ctx.author
-
     dbElement = dbThing.get(ctx.guild.id)
     if dbElement.channel_id is None:
         await send_no(ctx.channel, "no counting channel")
         return
 
+    if member is None:
+        member = ctx.author
+
     embed = top_embed(dbElement, member, 1)
     message = await send(ctx.channel,
                          embed = embed)
 
-    await message.add_reaction("⏪")
-    await message.add_reaction("◀️")
-    await message.add_reaction("▶️")
-    await message.add_reaction("⏩")
+    for emoji in "⏪◀▶⏩":
+        await message.add_reaction(emoji)
 
     top_messages[message.id] = TopMessagesElement(1, member)
 
     await asyncio.sleep(3000)
 
-    await message.clear_reaction("⏪")
-    await message.clear_reaction("◀️")
-    await message.clear_reaction("▶️")
-    await message.clear_reaction("⏩")
+    for emoji in "⏪◀▶⏩":
+        await message.clear_reaction(emoji)
 
     del top_messages[message.id]
 
@@ -95,7 +88,8 @@ async def top(ctx,
 async def start_count(ctx,
                       channel: Optional[discord.TextChannel] = None,
                       count: int = None):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
@@ -103,11 +97,11 @@ async def start_count(ctx,
     if channel is None:
         channel = ctx.channel
 
-    dbElement = dbThing.get(ctx.guild.id)
+    dbElement = dbThing.get(guild_id)
     dbElement.channel_id = channel.id
     if count is not None:
         dbElement.count = count
-    dbThing[ctx.guild.id] = DbElement
+    dbThing[guild_id] = DbElement
 
     await send_yes(ctx.channel, f"count started in {channel.mention} at `{count}`")
 
@@ -116,18 +110,19 @@ async def start_count(ctx,
 @commands.guild_only()
 async def set_count(ctx,
                     count: int):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id                
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
+    dbElement = dbThing.get(guild_id)
     if dbElement.channel_id is None:
         await send_no(ctx.channel, "no counting channel")
         return
 
     dbElement.count = count
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"count set to `{count}`")
 
@@ -141,12 +136,13 @@ async def ignore(ctx,
         await send_no(ctx.channel, "missing permissions")
         return
 
-    if not len(roles) and not len(members):
-        return
-
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if dbElement.channel_id is None:
         await send_no(ctx.channel, "no counting channel")
+        return
+
+    if not len(roles) and not len(members):
         return
 
     for role in roles:
@@ -155,7 +151,7 @@ async def ignore(ctx,
     for member in members:
         if member.id not in dbElement.ignored_members:
             dbElement.ignored_members.append(member.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel,
                    f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} ignored",
@@ -171,21 +167,22 @@ async def unignore(ctx,
         await send_no(ctx.channel, "missing permissions")
         return
 
-    if not len(roles) and not len(members):
-        return
-
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if dbElement.channel_id is None:
         await send_no(ctx.channel, "no counting channel")
         return
 
+    if not len(roles) and not len(members):
+        return
+    
     for role in roles:
         if role.id in dbElement.ignored_roles:
             dbElement.ignored_roles.remove(role.id)
     for member in members:
         if member.id in dbElement.ignored_members:
             dbElement.ignored_members.remove(member.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel,
                    f"{' '.join([role.mention for role in roles])} {' '.join([member.mention for member in members])} {'were' if len(roles) + len(members) > 1 else 'was'} unignored",
@@ -200,7 +197,6 @@ async def count_info(ctx):
         await send_no(ctx.channel, "missing permissions")
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
     if dbElement.channel_id is None:
         await send_no(ctx.channel, "no counting channel")
         return
@@ -235,16 +231,16 @@ async def count_info(ctx):
 @commands.guild_only()
 async def add_help_channel(ctx,
                            channels: commands.Greedy[discord.TextChannel]):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
     for channel in channels:
         if channel.id not in dbElement.help_channel_ids:
             dbElement.help_channel_ids.append(channel.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"added {' '.join([channel.mention for channel in channels])}")
 
@@ -253,16 +249,16 @@ async def add_help_channel(ctx,
 @commands.guild_only()
 async def remove_help_channel(ctx,
                               channels: commands.Greedy[discord.TextChannel]):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
     for channel in channels:
         if channel.id in dbElement.help_channel_ids:
             dbElement.help_channel_ids.remove(channel.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"removed {' '.join([channel.mention for channel in channels])}")
 
@@ -275,7 +271,6 @@ async def help_channels(ctx):
         await send_no(ctx.channel, "missing permissions")
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
     embed = discord.Embed(title = "help channels",
                           description = "\n".join([f"<#{id}>" for id in dbElement.help_channel_ids]))
 
@@ -287,12 +282,12 @@ async def help_channels(ctx):
 @commands.guild_only()
 async def acd(ctx,
               text = None):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
     
-    dbElement = dbThing.get(ctx.guild.id)
     if text == None:
         dbElement.acd = not dbElement.acd
     else:
@@ -303,7 +298,7 @@ async def acd(ctx,
             dbElement.acd = False
         else:
             return
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"acd {'enabled' if dbElement.acd else 'disabled'}")
 
@@ -312,12 +307,12 @@ async def acd(ctx,
 @commands.guild_only()
 async def repost(ctx,
                  text = None):
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
     
-    dbElement = dbThing.get(ctx.guild.id)
     if text == None:
         dbElement.repost = not dbElement.repost
     else:
@@ -328,7 +323,7 @@ async def repost(ctx,
             dbElement.repost = False
         else:
             return
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"repost {'enabled' if dbElement.acd else 'disabled'}")
 
@@ -384,6 +379,7 @@ async def purge(ctx,
     
     if num == None:
         return
+    
     if not len(channels):
         channels = [ctx.channel]
 
@@ -454,11 +450,12 @@ async def perms(ctx,
     if not len(roles):
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     for role in roles:
         if role.id not in dbElement.perms_roles:
             dbElement.perms_roles.append(role.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel,
                    f"{' '.join([role.mention for role in roles])} {'were' if len(roles) > 1 else 'was'} given perms",
@@ -476,11 +473,12 @@ async def remove_perms(ctx,
     if not len(roles):
         return
 
-    dbElement = dbThing.get(ctx.guild.id)
+    guild_id = ctx.guild.id
+    dbElement = dbThing.get(guild_id)
     for role in roles:
         if role.id not in dbElement.perms_roles:
             dbElement.perms_roles.remove(role.id)
-    dbThing[ctx.guild.id] = dbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel,
                    f"removed perms from {' '.join([role.mention for role in roles])}",
@@ -494,17 +492,15 @@ async def _eval(ctx, *, text):
         return
 
     try:
-        result = str(eval(text))
+        result = eval(text)
     except Exception as exception:
         await send(ctx.channel, f"```\n{exception}```")
     else:
-        try:
-            with open("eval.txt", "w") as file:
-                file.write(result)
+        with open("eval.txt", "w") as file:
+            file.write(str(result))
             await send(ctx.channel,
                        file = discord.File(fp = "eval.txt"))
-        finally:
-            os.remove("eval.txt")
+        os.remove("eval.txt")
 
 
 @bot.command(name="exec")
