@@ -8,9 +8,11 @@ from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_me
 from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
+import one_word_story
 #for eval and exec stuff
 from replit import db
 
+bot.story_list = []
 
 @bot.event
 async def on_ready():
@@ -24,11 +26,11 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
+    await one_word_story.one_word_story(message)
     await count(message)
     if not message.author.bot:
         await help_channel(message)
         await bot.process_commands(message)
-
 
 @bot.event
 async def on_message_edit(before, after):
@@ -82,6 +84,10 @@ async def top(ctx,
 
     del top_messages[message.id]
 
+@bot.command()
+@commands.guild_only()
+async def onestory(ctx):
+  await ctx.channel.send(("story:\n" + " ".join(bot.story_list))[:2000])
 
 @bot.command()
 @commands.guild_only()
