@@ -26,7 +26,7 @@ class DbElement:
         return cls(*element)
 
     def to_db_element(self):
-        return (self.channel_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members, self.ranking_dict, self.help_channel_ids, self.acd, self.repost, self.perms_roles)
+        return [self.channel_id, self.count, self.last_counter, self.ignored_roles, self.ignored_members, self.ranking_dict, self.help_channel_ids, self.acd, self.repost, self.perms_roles]
 
 
 class DbElementWithLock:

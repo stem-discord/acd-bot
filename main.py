@@ -80,14 +80,12 @@ async def top(ctx,
 
     for emoji in "⏪◀▶⏩":
         await message.add_reaction(emoji)
-
     top_messages[message.id] = TopMessagesElement(1, member)
 
     await asyncio.sleep(3000)
 
     for emoji in "⏪◀▶⏩":
         await message.clear_reaction(emoji)
-
     del top_messages[message.id]
 
 
@@ -227,7 +225,6 @@ async def count_info(ctx):
     embed.add_field(name = "ignored members",
                     value = ignored_members,
                     inline = False)
-
     await send(ctx.channel,
                embed = embed)
 
@@ -281,7 +278,6 @@ async def help_channels(ctx):
 
     embed = discord.Embed(title = "help channels",
                           description = "\n".join([f"<#{id}>" for id in dbElement.help_channel_ids]))
-
     await send(ctx.channel,
                embed = embed)
 

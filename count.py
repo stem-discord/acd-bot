@@ -111,6 +111,7 @@ async def count_reaction(reaction, user):
             top_messages[message_id].page = min(last_page, top_messages[message_id].page + 1)
         else:
             top_messages[message_id].page = last_page
+        
         embed = top_embed(dbElement, top_messages[message_id].member, top_messages[message_id].page)
         await reaction.message.edit(embed = embed)
         await reaction.remove(user)
