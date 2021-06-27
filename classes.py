@@ -6,7 +6,7 @@ from replit import db
 
 dev_ids = [736724275855228930, 444724485594152960, 275322364173221890, 341446613056880641]
 top_messages = {}
-
+story_list = []
 
 class DbElement:
     def __init__(self, channel_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost, perms_roles):
@@ -88,3 +88,4 @@ bot = commands.Bot(command_prefix = '$',
                    intents = discord.Intents.all(),
                    help_command = None,
                    case_insensitive = True)
+bot.story_list = []

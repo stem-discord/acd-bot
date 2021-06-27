@@ -8,11 +8,9 @@ from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_me
 from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
-import one_word_story
+from one_word_story import one_word_story
 #for eval and exec stuff
 from replit import db
-
-bot.story_list = []
 
 @bot.event
 async def on_ready():
@@ -26,8 +24,8 @@ async def on_guild_join(guild):
 
 @bot.event
 async def on_message(message):
-    await one_word_story.one_word_story(message)
     await count(message)
+    await one_word_story(message)
     if not message.author.bot:
         await help_channel(message)
         await bot.process_commands(message)
@@ -51,6 +49,14 @@ async def on_command_error(ctx, error):
     else:
         print(error)
         await send_no(ctx.channel, "an error occured")
+
+
+@bot.command()
+@commands.guild_only()
+async def story(ctx):
+    embed = discord.Embed(title = "one word story", description = " ".join(bot.story_list)[:6000])
+    await send(ctx.channel,
+               embed = embed)
 
 
 #count commands
@@ -84,10 +90,6 @@ async def top(ctx,
 
     del top_messages[message.id]
 
-@bot.command()
-@commands.guild_only()
-async def onestory(ctx):
-  await ctx.channel.send(("story:\n" + " ".join(bot.story_list))[:2000])
 
 @bot.command()
 @commands.guild_only()
