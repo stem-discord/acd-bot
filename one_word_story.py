@@ -51,3 +51,19 @@ async def one_word_story(message):
     
     bot.story_list = [x.content for x in await message.channel.history().flatten()][::-1]
     last_person = message.author.id
+
+
+async def edit_story(before):
+    if before.channel.id != 857913632599572490:
+        return
+    
+    last_message = (await before.channel.history(limit = 1).flatten())[0]
+    if before == last_message:
+        await last_message.delete()
+        await warn(before, "please don't edit messages")
+        bot.story_list = [x.content for x in await before.channel.history().flatten()][::-1]
+        return
+    
+    await warn(before,
+               "please don't edit messages",
+               delete = False)

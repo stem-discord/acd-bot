@@ -8,7 +8,7 @@ from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_me
 from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
 from help_channel import ocr, help_channel
-from one_word_story import one_word_story
+from one_word_story import one_word_story, edit_story
 #for eval and exec stuff
 from replit import db
 
@@ -34,6 +34,7 @@ async def on_message(message):
 async def on_message_edit(before, after):
     if not after.author.bot:
         await edit_count(before)
+        await edit_story(before)
         await bot.process_commands(after)
 
 
@@ -377,7 +378,7 @@ async def purge(ctx,
                 members: commands.Greedy[discord.Member] = [],
                 num: int = None):
     dbElement = dbThing.get(ctx.guild.id)
-    if not has_perms(ctx.message, dbElement) and ctx.authorctx.author.id not in dev_ids:
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
     
@@ -430,7 +431,7 @@ async def image_to_text(ctx):
 async def members(ctx,
                   role: discord.Role):
     dbElement = dbThing.get(ctx.guild.id)
-    if not has_perms(ctx.message, dbElement) and ctx.authorctx.author.id not in dev_ids:
+    if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
 

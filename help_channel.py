@@ -70,7 +70,7 @@ async def repost(message):
                 if temp:
                     await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on asking questions.\n*This action was performed automatically.*")
                     os.remove(f"temp/{file_name}")
-                    await log(message, "acd")
+                    await log(message, "repost")
                     return
             os.rename(f"temp/{file_name}", f"image_cache/{file_name}")
         else:
