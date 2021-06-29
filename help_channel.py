@@ -57,30 +57,32 @@ async def acd(message):
 
 
 async def repost(message):
+    author_id = message.author.id
     dbElement = dbThing.get(message.guild.id)
     for attachment in message.attachments:
+        file_name = attachment.filename
         if dbElement.repost: 
-            file_name = attachment.filename
             await attachment.save(f"temp/{file_name}")
             for image_name in os.listdir("image_cache"):
-                temp = False
-                with open(f"temp/{file_name}", "rb") as file1:
-                    with open(f"image_cache/{image_name}", "rb") as file2:
-                        temp = file1.read() == file2.read()
-                if temp:
-                    await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on asking questions.\n*This action was performed automatically.*")
-                    os.remove(f"temp/{file_name}")
-                    await log(message, "repost")
-                    return
-            os.rename(f"temp/{file_name}", f"image_cache/{file_name}")
+                if author_id == int(image_name.split()[0]):
+                    temp = False
+                    with open(f"temp/{file_name}", "rb") as file1:
+                        with open(f"image_cache/{image_name}", "rb") as file2:
+                            temp = file1.read() == file2.read()
+                    if temp:
+                        await message.channel.send(f"{message.author.mention}, please don't repost questions.\nSee <#625027300920000542> for guidelines on asking questions.\n*This action was performed automatically.*")
+                        os.remove(f"temp/{file_name}")
+                        await log(message, "repost")
+                        return
+            os.rename(f"temp/{file_name}", f"image_cache/{author_id} {file_name}")
         else:
-            await attachment.save(f"image_cache/{file_name}")
+            await attachment.save(f"image_cache/{author_id} {file_name}")
     
     await asyncio.sleep(300)
 
     for attachment in message.attachments:
         try:
-            os.remove(f"image_cache/{attachment.filename}")
+            os.remove(f"image_cache/{author_id} {attachment.filename}")
         except:
             pass
 

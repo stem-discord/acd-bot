@@ -1,6 +1,8 @@
+from replit import db
 from classes import bot
 from funcs import warn
 import re
+
 
 def validation(s):
     # no multi
@@ -30,7 +32,6 @@ def validation(s):
 
     return True
 
-last_person = None
 
 async def one_word_story(message):
     global last_person
@@ -45,25 +46,26 @@ async def one_word_story(message):
         await warn(message, "please type one word")
         return
 
-    if message.author.id == last_person:
+    if message.author.id == db['last_person']:
         await warn(message, "please type after one another")
         return
     
     bot.story_list = [x.content for x in await message.channel.history().flatten()][::-1]
-    last_person = message.author.id
+    db['last_person'] = message.author.id
 
 
-async def edit_story(before):
-    if before.channel.id != 857913632599572490:
+async def edit_story(after):
+    if after.channel.id != 857913632599572490:
         return
     
-    last_message = (await before.channel.history(limit = 1).flatten())[0]
-    if before == last_message:
+    last_message = (await after.channel.history(limit = 1).flatten())[0]
+    if after == last_message:
         await last_message.delete()
-        await warn(before, "please don't edit messages")
-        bot.story_list = [x.content for x in await before.channel.history().flatten()][::-1]
+        await warn(after, "please don't edit messages")
+        bot.story_list = [x.content for x in await after.channel.history().flatten()][::-1]
+        db['last_person'] = (await after.channel.history(limit = 1).flatten())[0].author.id
         return
     
-    await warn(before,
+    await warn(after,
                "please don't edit messages",
                delete = False)

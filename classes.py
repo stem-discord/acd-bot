@@ -6,7 +6,7 @@ from replit import db
 
 dev_ids = [736724275855228930, 444724485594152960, 275322364173221890, 341446613056880641]
 top_messages = {}
-story_list = []
+
 
 class DbElement:
     def __init__(self, channel_id, count, last_counter, ignored_roles, ignored_members, ranking_dict, help_channel_ids, acd, repost, perms_roles):
@@ -35,7 +35,7 @@ class DbElementWithLock:
         self.lock = asyncio.Lock()
 
 
-class Something: #idk what to call this
+class DbThing: #idk what to call this
     def __init__(self, db):
         self.db = db
         self._cache = {}
@@ -82,10 +82,11 @@ class TopMessagesElement:
         self.member = member
 
 
-dbThing = Something(db) #very bad name, must fix
+dbThing = DbThing(db) #very bad name, must fix
 
 bot = commands.Bot(command_prefix = '$',
                    intents = discord.Intents.all(),
                    help_command = None,
                    case_insensitive = True)
+
 bot.story_list = []

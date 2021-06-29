@@ -12,6 +12,7 @@ from one_word_story import one_word_story, edit_story
 #for eval and exec stuff
 from replit import db
 
+
 @bot.event
 async def on_ready():
     print("online")
@@ -34,7 +35,7 @@ async def on_message(message):
 async def on_message_edit(before, after):
     if not after.author.bot:
         await edit_count(before)
-        await edit_story(before)
+        await edit_story(after)
         await bot.process_commands(after)
 
 
@@ -50,14 +51,6 @@ async def on_command_error(ctx, error):
     else:
         print(error)
         await send_no(ctx.channel, "an error occured")
-
-
-@bot.command()
-@commands.guild_only()
-async def story(ctx):
-    embed = discord.Embed(title = "one word story", description = " ".join(bot.story_list)[:6000])
-    await send(ctx.channel,
-               embed = embed)
 
 
 #count commands
@@ -402,6 +395,17 @@ async def purge(ctx,
 
     for channel in channels:
         await channel.purge(limit = num)
+
+
+#one-word story commands
+
+
+@bot.command()
+@commands.guild_only()
+async def story(ctx):
+    embed = discord.Embed(title = "one word story", description = " ".join(bot.story_list)[:6000])
+    await send(ctx.channel,
+               embed = embed)
 
 
 #utility commands
