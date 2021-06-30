@@ -110,7 +110,7 @@ async def start_count(ctx,
 @commands.guild_only()
 async def set_count(ctx,
                     count: int):
-    guild_id = ctx.guild.id                
+    guild_id = ctx.guild.id
     dbElement = dbThing.get(guild_id)
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -310,7 +310,7 @@ async def repost(ctx,
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
-    
+
     if text == None:
         dbElement.repost = not dbElement.repost
     else:
@@ -339,7 +339,7 @@ async def hide_channel(ctx,
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
-    
+
     if not len(channels):
         channels = [ctx.channel]
     if not len(roles) and not len(members):
@@ -374,10 +374,10 @@ async def purge(ctx,
     if not has_perms(ctx.message, dbElement) and ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
         return
-    
+
     if num == None:
         return
-    
+
     if not len(channels):
         channels = [ctx.channel]
 
@@ -527,6 +527,6 @@ async def _exec(ctx, *, text):
 
 #clear image_cache before running
 for file_name in os.listdir("image_cache"):
-	os.remove(f"image_cache/{file_name}")
+    os.remove(f"image_cache/{file_name}")
 
 bot.run(os.getenv("TOKEN"))

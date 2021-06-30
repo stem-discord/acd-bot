@@ -60,7 +60,7 @@ async def edit_count(before):
     dbElement = dbThing.get(guild_id)
     if dbElement.channel_id != before.channel.id:
         return
-    
+
     content = before.content
     if dbElement.count - int(content) < 3:
         await before.channel.purge(limit = [message.id for message in await before.channel.history().flatten()].index(before.id)+1)
@@ -68,7 +68,7 @@ async def edit_count(before):
         dbElement.count = int(content) - 1
         dbThing[guild_id] = dbElement
         return
-    
+
     await warn(before,
                "please don't edit messages",
                delete = False)

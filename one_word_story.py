@@ -6,15 +6,15 @@ import re
 
 def validation(s):
     # no multi
-    if ('\n' in s):
+    if '\n' in s:
         return False
 
     # simple no special character check
-    if (not re.match("^[A-Za-z\"\'\-“‟”’]{1,16}$", s)):
+    if not re.fullmatch("[A-Za-z\"\'\-“‟”’]{1,16}", s):
         return False
 
     # the string will allow a 'string or 'string' but not string'
-    if (s.startswith("'") - s.endswith("'") < 0):
+    if not s.startswith("'") and s.endswith("'"):
         return False
 
     s = re.sub("[\"\'\-“‟”’]", '', s)
@@ -26,16 +26,14 @@ def validation(s):
     # if (not re.match("[A-Z]+|[a-z]+", s)):
     #     return False
 
-    # check for obvious spam by measuring constant length
-    if (re.match("[^aeiouy]{6,}", s)):
+    # check for obvious spam by measuring consonant length
+    if re.match("[^aeiouy]{6,}", s):
         return False
 
     return True
 
 
 async def one_word_story(message):
-    global last_person
-    
     if message.channel.id != 857913632599572490:
         return
 
@@ -57,7 +55,7 @@ async def one_word_story(message):
 async def edit_story(after):
     if after.channel.id != 857913632599572490:
         return
-    
+
     last_message = (await after.channel.history(limit = 1).flatten())[0]
     if after == last_message:
         await last_message.delete()
@@ -65,7 +63,7 @@ async def edit_story(after):
         bot.story_list = [x.content for x in await after.channel.history().flatten()][::-1]
         db['last_person'] = (await after.channel.history(limit = 1).flatten())[0].author.id
         return
-    
+
     await warn(after,
                "please don't edit messages",
                delete = False)
