@@ -101,7 +101,7 @@ async def start_count(ctx,
     dbElement.channel_id = channel.id
     if count is not None:
         dbElement.count = count
-    dbThing[guild_id] = DbElement
+    dbThing[guild_id] = dbElement
 
     await send_yes(ctx.channel, f"count started in {channel.mention} at `{count}`")
 
@@ -397,7 +397,7 @@ async def purge(ctx,
         await channel.purge(limit = num)
 
 
-#one-word story commands
+#one word story commands
 
 
 @bot.command()
@@ -417,8 +417,7 @@ async def randomize(ctx):
     if ctx.guild.id == 493173110799859713:
         role = bot.get_guild(493173110799859713).get_role(851931290776240208)
         if role in ctx.author.roles:
-            color = random.randint(0, 0xffffff)
-            await role.edit(color = color)
+            await role.edit(color = random.randint(0, 0xffffff))
             await send_yes(ctx.channel, "color randomized")
             return
 
@@ -494,7 +493,14 @@ async def remove_perms(ctx,
                    allowed_mentions = discord.AllowedMentions.none())
 
 
-@bot.command(name="eval")
+@bot.command()
+@commands.guild_only()
+async def clear_image_cache(ctx):
+    for file_name in os.listdir("image_cache"):
+        os.remove(f"image_cache/{file_name}")
+
+
+@bot.command(name = "eval")
 async def _eval(ctx, *, text):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -512,7 +518,7 @@ async def _eval(ctx, *, text):
         os.remove("eval.txt")
 
 
-@bot.command(name="exec")
+@bot.command(name = "exec")
 async def _exec(ctx, *, text):
     if ctx.author.id not in dev_ids:
         await send_no(ctx.channel, "missing permissions")
@@ -525,7 +531,6 @@ async def _exec(ctx, *, text):
         await send(ctx.channel, f"```\n{exception}```")
 
 
-#clear image_cache before running
 for file_name in os.listdir("image_cache"):
     os.remove(f"image_cache/{file_name}")
 
