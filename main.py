@@ -7,7 +7,7 @@ from typing import Optional
 from classes import DbElement, TopMessagesElement, dbThing, bot, dev_ids, top_messages
 from count import count, top_embed, count_reaction, edit_count
 from funcs import send, send_yes, send_no, has_perms
-from help_channel import ocr, help_channel
+from help_channel import ocr, help_channel, blocked
 from one_word_story import one_word_story, edit_story
 #for eval and exec stuff
 from replit import db
@@ -28,7 +28,9 @@ async def on_message(message):
     await count(message)
     await one_word_story(message)
     if not message.author.bot:
-        await help_channel(message)
+        if len(message.attachments):
+            await blocked(message)
+            await help_channel(message)
         await bot.process_commands(message)
 
 @bot.event
@@ -513,8 +515,8 @@ async def _eval(ctx, *, text):
     else:
         with open("eval.txt", "w") as file:
             file.write(str(result))
-            await send(ctx.channel,
-                       file = discord.File(fp = "eval.txt"))
+        await send(ctx.channel,
+                   file = discord.File(fp = "eval.txt"))
         os.remove("eval.txt")
 
 

@@ -1,4 +1,5 @@
 import discord
+from replit import db
 import asyncio
 import os
 import requests
@@ -94,10 +95,10 @@ async def repost(message):
 #improve algorithm
 def is_acd(message):
     ignore = ("practice", "review", "homework", "hw")
-    flags = ("quiz", "quizzes", "test", "tests", "exam", "exams", "assessment", "assessments")
+    flags = ("quiz", "quizzes", "exam", "exams", "assessment", "assessments")
 
     temp = ocr(message)
-    return not any((ignored in temp) for ignored in ignore) and any((flag in temp) for flag in flags)
+    return not any(ignored in temp for ignored in ignore) and any(flag in temp for flag in flags)
 
 
 async def help_channel(message):
@@ -105,10 +106,13 @@ async def help_channel(message):
     if message.channel.id not in dbElement.help_channel_ids:
         return
 
-    if not len(message.attachments):
-        return
-
     if is_acd(message):
         await acd(message)
 
     await repost(message)
+
+
+async def blocked(message):
+    if any(blocked in ocr(message) for blocked in db['blocked']):
+        await message.delete()
+        await log(message, "blocked")

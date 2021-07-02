@@ -5,28 +5,28 @@ import re
 
 
 def validation(s):
-    # no multi
+    #no multi
     if '\n' in s:
         return False
 
-    # simple no special character check
+    #simple no special character check
     if not re.fullmatch("[A-Za-z\"\'\-“‟”’]{1,16}", s):
         return False
 
-    # the string will allow a 'string or 'string' but not string'
+    #the string will allow a 'string or 'string' but not string'
     if not s.startswith("'") and s.endswith("'"):
         return False
 
     s = re.sub("[\"\'\-“‟”’]", '', s)
 
-    # capitalization
-    # removed due to proper nouns such as ToysRUs
-    # if (not re.match("[A-Z]?[a-z]*$", s)):
-    #     return False
-    # if (not re.match("[A-Z]+|[a-z]+", s)):
-    #     return False
+    #capitalization
+    #removed due to proper nouns such as ToysRUs
+    #if (not re.match("[A-Z]?[a-z]*$", s)):
+    #    return False
+    #if (not re.match("[A-Z]+|[a-z]+", s)):
+    #    return False
 
-    # check for obvious spam by measuring consonant length
+    #check for obvious spam by measuring consonant length
     if re.match("[^aeiouy]{6,}", s):
         return False
 
