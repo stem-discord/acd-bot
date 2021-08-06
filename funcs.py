@@ -1,50 +1,44 @@
-import asyncio
-from classes import dbThing
+from asyncio import sleep
+from json import *
+
+dev_ids = {736724275855228930, 444724485594152960, 275322364173221890, 341446613056880641}
+role_ids = {536996925581295627, 534923363748151301, 643287653344870400}
 
 
-async def send(channel,
-               content = None,
-               **kwargs):
-    message = await channel.send(content, **kwargs)
-
-    dbElement = dbThing.get(channel.guild.id)
-    if dbElement.channel_id != channel.id:
-        return message
-
-    await asyncio.sleep(3)
-    try:
-        await message.delete()
-    except:
-        pass
-
-    return message
+async def react_yes(message):
+    await message.add_reaction("<a:symbol_right:666800714483236864>")
 
 
-async def send_yes(channel, content, **kwargs):
-    await send(channel, f"<a:symbol_right:666800714483236864> {content}", **kwargs)
+async def react_no(message):
+    await message.add_reaction("<a:symbol_wrong:666800714991009792>")
 
 
-async def send_no(channel, content, **kwargs):
-    await send(channel, f"<a:symbol_wrong:666800714991009792> {content}", **kwargs)
+def has_perms(member):
+    return member.id in dev_ids or any(role.id in role_ids for role in member.roles)
 
 
-def has_perms(message, dbElement):
-    return any(role.id in dbElement.perms_roles for role in message.author.roles)
-
-
-async def warn(message,
-               text,
-               delete = True):
+async def warn(message, content, delete = True):
     if delete:
         try:
             await message.delete()
         except:
             pass
 
-    warning = await message.channel.send(f"{message.author.mention}, {text}!")
-    await asyncio.sleep(3)
+    message = await message.channel.send(f"{message.author.mention}, {content}!")
 
+    await sleep(3)
     try:
-        await warning.delete()
+        await message.delete()
     except:
         pass
+
+
+def get_db():
+    with open("db.json") as file:
+        data = load(file)
+        return data
+
+
+def save_db(db):
+    with open("db.json", "w") as file:
+        dump(db, file)
