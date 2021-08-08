@@ -155,6 +155,7 @@ async def acd(ctx, state):
     elif state == "off":
         db["acd"] = False
     else:
+        await react_no(message)
         return
     save_db(db)
 
@@ -176,6 +177,7 @@ async def repost(ctx, state):
     elif state == "off":
         db["repost"] = False
     else:
+        await react_no(message)
         return
     save_db(db)
 
@@ -188,28 +190,29 @@ async def repost(ctx, state):
 @bot.command(aliases = ["randomise"])
 @commands.guild_only()
 async def randomize(ctx):
-    if ctx.guild.id == 493173110799859713:
-        role = bot.get_guild(493173110799859713).get_role(851931290776240208)
-        message = ctx.message
-        if role in ctx.author.roles:
-            await role.edit(color = random.randint(0, 0xffffff))
-            await react_yes(message)
-            return
-
+    guild = bot.get_guild(493173110799859713)
+    author = guild.get_member(ctx.author.id)
+    message = ctx.message
+    if author is None:
         await react_no(message)
+        return
 
+    role = guild.get_role(851931290776240208)
+    if role not in author.roles:
+        await react_no(message)
+        return
 
-@bot.command()
-async def image_to_text(ctx):
-    await ctx.message.reply(" ".join(ocr(ctx.message)))
-
-
-#dev commands
+    await role.edit(color = random.randint(0, 0xffffff))
+    await react_yes(message)
+    return
 
 
 @bot.command()
 async def ping(ctx):
-    await ctx.message.reply(f"{int(bot.latency*1000)} ms")
+    await ctx.message.reply(f"`{int(bot.latency*1000)}` ms.")
+
+
+#dev commands
 
 
 @bot.command()

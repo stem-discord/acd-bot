@@ -49,18 +49,16 @@ async def log(bot, message, title):
 async def acd(bot, slash, message):
     emoji = await bot.get_guild(493173110799859713).fetch_emoji(666800714991009792)
     action_row = create_actionrow(create_button(style = 4, emoji = emoji))
-    content = (f"{message.author.mention}, academic dishonesty, such as asking for help on a quiz or test, is not allowed.\n"
-               "Use `?acd` for more information.\n"
+    content = (f"{message.author.mention}, academic dishonesty is not allowed!\n"
                "*This action was performed automatically.*")
     await message.channel.send(content, components = [action_row])
 
     temp, embed = await log(bot, message, "acd")
 
     button_ctx: ComponentContext = await wait_for_component(bot, components = action_row)
-
     await button_ctx.edit_origin(components = None)
 
-    embed.color = 0xe74c3c
+    embed.color = 0xed4245
     await temp.edit(embed = embed)
 
 
@@ -80,8 +78,7 @@ async def repost(bot, message):
                     except:
                         pass
 
-                    await channel.send(f"{author.mention}, please don't repost questions.\n"
-                                        "See <#625027300920000542> for guidelines on asking questions.\n"
+                    await channel.send(f"{author.mention}, please don't repost questions!\n"
                                         "*This action was performed automatically.*")
 
                     await log(bot, message, "repost")
