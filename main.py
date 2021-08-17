@@ -202,14 +202,14 @@ async def randomize(ctx):
         await react_no(message)
         return
 
-    await role.edit(color = random.randint(0, 0xffffff))
+    await role.edit(color = randint(0, 0xffffff))
     await react_yes(message)
     return
 
 
 @bot.command()
 async def ping(ctx):
-    await ctx.message.reply(f"`{int(bot.latency*1000)}` ms.")
+    await ctx.message.reply(f"`{int(bot.latency*1000)}` ms")
 
 
 #dev commands

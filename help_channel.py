@@ -48,8 +48,9 @@ async def log(bot, message, title):
 
 async def acd(bot, slash, message):
     emoji = await bot.get_guild(493173110799859713).fetch_emoji(666800714991009792)
-    action_row = create_actionrow(create_button(style = 4, emoji = emoji))
-    content = (f"{message.author.mention}, academic dishonesty is not allowed!\n"
+    action_row = create_actionrow(create_button(style = 4, label = "this was a mistake", emoji = emoji, custom_id = "mistake"),
+                                  create_button(style = 4, label = "more info", emoji = "❓", custom_id = "info"))
+    content = (f"{message.author.mention}, academic dishonesty isn't allowed!\n"
                "*This action was performed automatically.*")
     await message.channel.send(content, components = [action_row])
 
