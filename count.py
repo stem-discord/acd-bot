@@ -23,7 +23,7 @@ async def count(message):
         if has_perms(author):
             return
 
-        await warn(channel, "please count")
+        await warn(message, "please count")
         return
 
     db = get_db()
