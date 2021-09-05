@@ -10,10 +10,9 @@ from funcs import *
 
 
 def ocr(message):
-    formats = ("png", "jpg", "jpeg")
     temp = []
     for attachment in message.attachments:
-        if any(attachment.filename.endswith(format) for format in formats):
+        if 'image' in attachment.content_type:
             payload = {"url": attachment.url, "apikey": "429cfbc1f588957"}
             r = requests.post("https://api.ocr.space/parse/image", data = payload)
 
